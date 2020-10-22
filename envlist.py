@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct 22 13:53:15 2020
 
-@author: sam4f
-"""
 
 #!/data/miniconda3/envs/env1/bin/python
 
