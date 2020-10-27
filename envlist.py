@@ -1,5 +1,3 @@
-
-
 #!/data/miniconda3/envs/env1/bin/python
 
 from filelock import FileLock
@@ -42,12 +40,12 @@ lock = FileLock(lock_path, timeout=time_out_secs)
 
 with lock:
     if pmode == RESET_MODE:
-        # create a list (named clist) of nevns environments with the 
+        # create a list (named clist) of nevns environments with the
         # prefix envprefix
         # add code here
         clist = []
-        for i in range(len(nenvs)):
-            clist[i] = str(envprefix) + str(i)
+        for i in range(int(nenvs)):
+            clist.append(str(envprefix) + str(i))
     else:
         # load hickle file
         clist = hickle.load(file_path)
@@ -55,13 +53,14 @@ with lock:
         if pmode == WRITE_MODE:
             # append env to the clist
             # add code here
-            clist.append(sys.argv[1])
+            clist.append(env)
         else:
             # get and remove env from clist
             # add code here
             # return env name
-            clist.remove(0)
-        print(env)
+            env = clist[0]
+            clist.remove(env)
+            print(env)
 
     # save hickle file
     hickle.dump(clist, file_path, mode="w")
