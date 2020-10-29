@@ -14,14 +14,7 @@ class Waveform(DPT.DPObject):
         DPT.DPObject.__init__(self, *args, **kwargs)
 
     def create(self, *args, **kwargs):
-        pwd = os.path.normpath(os.getcwd());
-        # 'channelxxx, xxx is the number of the channel'
-        self.channel_filename = [os.path.basename(pwd)]  
-        template_filename = os.path.join(
-            DPT.levels.resolve_level('day', self.channel_filename[0]),
-            'mountains', self.channel_filename[0], 'output', 'templates.hkl')
-        templates = hkl.load(template_filename)
-        self.data = [np.squeeze(templates)]
+        
         # this function will be called once to create this waveform object
         
         # one neat property of Object-Oriented Programming (OOP) structure is that 
@@ -63,7 +56,23 @@ class Waveform(DPT.DPObject):
             # create empty object if data is empty
             DPT.DPObject.create(self, dirs=[], *args, **kwargs)            
         
+        pwd = os.path.normpath(os.getcwd());
+        # 'channelxxx, xxx is the number of the channel'
+        self.channel_filename = [os.path.basename(pwd)]  
+        template_filename = os.path.join(
+            DPT.levels.resolve_level('day', self.channel_filename[0]),
+            'mountains', self.channel_filename[0], 'output', 'templates.hkl')
+        templates = hkl.load(template_filename)
+        self.data = [np.squeeze(templates)]
         
+        aname = DPT.levels.normpath(os.path.dirname(pwd))
+        
+        self.array_dict = dict()
+        self.array_dict[aname] = 0
+        
+        self.numSets = 1
+        self.current_plot_type = None
+
         
     def append(self, wf):
         # this function will be called by processDirs to append the values of certain fields
@@ -74,6 +83,10 @@ class Waveform(DPT.DPObject):
         # .........................................
         # ..................code...................
         # .........................................
+        for ar in wf.array_dict:
+            self.array_dict[ar] = self.numSets
+        self.numSets += 1
+
         
     def plot(self, i = None, ax = None, getNumEvents = False, getLevels = False,\
              getPlotOpts = False, overlay = False, **kwargs):
