@@ -14,7 +14,6 @@ class Waveform(DPT.DPObject):
         DPT.DPObject.__init__(self, *args, **kwargs)
 
     def create(self, *args, **kwargs):
-        
         # this function will be called once to create this waveform object
         
         # one neat property of Object-Oriented Programming (OOP) structure is that 
@@ -42,24 +41,21 @@ class Waveform(DPT.DPObject):
         # The following is some hints of the things-to-do:
         
         # read the mountainsort template files
-        # .........................................
-        # ..................code...................
-        # .........................................
-        pwd = os.path.normpath(os.getcwd());
         # 'channelxxx, xxx is the number of the channel'
-        self.channel_filename = [os.path.basename(pwd)]  
+        pwd = os.path.normpath(os.getcwd());
+        
+        self.channel_filename = [os.path.basename(pwd)]
         template_filename = os.path.join(
-            DPT.levels.resolve_level('day', self.channel_filename[0]),
-            'mountains', self.channel_filename[0], 'output', 'templates.hkl')
+                DPT.levels.resolve_level('day', self.channel_filename[0]),
+                'mountains', self.channel_filename[0],
+                'output', 'templates.hkl')
         templates = hkl.load(template_filename)
         self.data = [np.squeeze(templates)]
         
         
-
-        
         # check on the mountainsort template data and create a DPT object accordingly
         # Example:
-        if (self.data):
+        if (self.data): 
             # create object if data is not empty
             DPT.DPObject.create(self, *args, **kwargs)
         else:
@@ -67,26 +63,21 @@ class Waveform(DPT.DPObject):
             DPT.DPObject.create(self, dirs=[], *args, **kwargs)            
         
         aname = DPT.levels.normpath(os.path.dirname(pwd))
-        
         self.array_dict = dict()
         self.array_dict[aname] = 0
-        
         self.numSets = 1
         self.current_plot_type = None
-        
+
     def append(self, wf):
         # this function will be called by processDirs to append the values of certain fields
         # from an extra object (wf) to this object
         # It is useful to store the information of the objects for panning through in the future
         DPT.DPObject.append(self, wf)  # append self.setidx and self.dirs
         self.data = self.data + wf.data
-        # .........................................
-        # ..................code...................
-        # .........................................
         for ar in wf.array_dict:
             self.array_dict[ar] = self.numSets
         self.numSets += 1
-
+        
         
     def plot(self, i = None, ax = None, getNumEvents = False, getLevels = False,\
              getPlotOpts = False, overlay = False, **kwargs):
@@ -166,6 +157,4 @@ class Waveform(DPT.DPObject):
     # This will greatly increase the efficiency in maintaining the codes,
     # especially for those lines that are used for multiple times in multiple places.
     # Other than that, this will also greatly increase the readability of the code
-        
-        
-    
+                
