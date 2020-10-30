@@ -41,9 +41,6 @@ class Waveform(DPT.DPObject):
         # The following is some hints of the things-to-do:
         
         # read the mountainsort template files
-        # .........................................
-        # ..................code...................
-        # .........................................
         pwd = os.path.normpath(os.getcwd());
         # 'channelxxx, xxx is the number of the channel'
         self.channel_filename = [os.path.basename(pwd)]  
@@ -60,6 +57,7 @@ class Waveform(DPT.DPObject):
         else:
             # create empty object if data is empty
             DPT.DPObject.create(self, dirs=[], *args, **kwargs)
+            
         aname = DPT.levels.normpath(os.path.dirname(pwd))
         self.array_dict = dict()
         self.array_dict[aname] = 0
@@ -96,7 +94,7 @@ class Waveform(DPT.DPObject):
         # in the menu evoked by right-clicking on the axis after the window is created by PanGUI.create_window
         # for more information, please check in PanGUI.main.create_menu
         plotOpts = {'PlotType': DPT.objects.ExclusiveOptions(['Channel', 'Array'], 0), \
-            'LabelsOff': False, 'TitleOff': False}
+            'LabelsOff': False, 'TitleOff': False, 'TicksOff': False}
 
         # update the plotOpts based on kwargs, these two lines are important to
         # receive the input arguments and act accordingly
@@ -116,22 +114,8 @@ class Waveform(DPT.DPObject):
             # ..................code...................
             # .........................................
             if plot_type == 'Channel':
-                y = self.data[i]
-                x = np.arange(y.shape[0])
-                ax.plot(x, y)
-
-        if not plotOpts['TitleOff']:
-            ax.set_title(self.dirs[i])
-                
-        if not plotOpts['LabelsOff']:
-            ax.set_xlabel('Time (sample unit)')
-            ax.set_ylabel('Voltage (uV)')
-
-        if plotOpts['TicksOff']:
-            ax.set_xticklabels([])
-            ax.set_yticklabels([])
-
-            return self.numSets, i# please return two items here: <total-number-of-items-to-plot>, <current-item-index-to-plot>
+            
+                return self.numSets, i# please return two items here: <total-number-of-items-to-plot>, <current-item-index-to-plot>
                 
         if ax is None:
             ax = plt.gca()
@@ -147,7 +131,10 @@ class Waveform(DPT.DPObject):
             # .........................................
             # ..................code...................
             # .........................................
-            pass  # you may delete this line
+            y = self.data[i]
+            x = np.arange(y.shape[0])
+            ax.plot(x, y)
+
     
         ########labels###############
         if not plotOpts['TitleOff']:  # if TitleOff icon in the right-click menu is clicked
@@ -155,15 +142,20 @@ class Waveform(DPT.DPObject):
             # .........................................
             # ..................codes..................
             # .........................................
-            pass  # you may delete this line
+            ax.set_title(self.dirs[i])
             
         if not plotOpts['LabelsOff']:  # if LabelsOff icon in the right-click menu is clicked
             # set the xlabel and ylabel
             # .........................................
             # ..................code...................
             # .........................................
-            pass  # you may delete this line
-            
+            ax.set_xlabel('Time (sample unit)')
+            ax.set_ylabel('Voltage (uV)')
+
+        if plotOpts['TicksOff']:
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+
         return ax
     
     
