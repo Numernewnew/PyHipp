@@ -5,11 +5,19 @@
 #SBATCH --time=24:00:00   # walltime
 #SBATCH --ntasks=1   # number of processor cores (i.e. tasks)
 #SBATCH --nodes=1   # number of nodes
+<<<<<<< HEAD
 #SBATCH -J "rplhps"   # job name
 
 ## /SBATCH -p general # partition (queue)
 #SBATCH -o rplhps-slurm.%N.%j.out # STDOUT
 #SBATCH -e rplhps-slurm.%N.%j.err # STDERR
+=======
+#SBATCH -J "sort"   # job name
+
+## /SBATCH -p general # partition (queue)
+#SBATCH -o sort-slurm.%N.%j.out # STDOUT
+#SBATCH -e sort-slurm.%N.%j.err # STDERR
+>>>>>>> 24b9704dfa400693380453e39f6bf9a7198a7657
 
 # LOAD MODULES, INSERT CODE, AND RUN YOUR PROGRAMS HERE
 /data/miniconda3/bin/conda init

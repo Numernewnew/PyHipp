@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import hickle as hkl
 import os
 import numpy as np
+from .misc import getChannelInArray
 
 class Waveform(DPT.DPObject):
     # Please change the class name according to your needs
@@ -104,24 +105,48 @@ class Waveform(DPT.DPObject):
         # update the plotOpts based on kwargs, these two lines are important to
         # receive the input arguments and act accordingly
         for (k, v) in plotOpts.items():
-                    plotOpts[k] = kwargs.get(k, v)  
+            plotOpts[k] = kwargs.get(k, v)  
                     
         plot_type = plotOpts['PlotType'].selected()  # this variable will store the selected item in 'Type'
 
         if getPlotOpts:  # this will be called by PanGUI.main to obtain the plotOpts to create a menu once we right-click on the axis
             return plotOpts 
 
+        if self.current_plot_type is None:
+            self.current_plot_type = plot_type
+
+
         if getNumEvents:  
             # this will be called by PanGUI.main to return two values: 
             # first value is the total number of items to pan through, 
             # second value is the current index of the item to plot
-            # .........................................
-            # ..................code...................
-            # .........................................
-            if plot_type == 'Channel':
             
-                return self.numSets, i# please return two items here: <total-number-of-items-to-plot>, <current-item-index-to-plot>
+            if self.current_plot_type == plot_type: #when there is no change
+                if plot_type == 'Channel':
+                    return self.numSets, i 
+                elif plot_type == 'Array':
+                    return len(self.array_dict), i
                 
+            elif self.current_plot_type == 'Array' and plot_type == 'Channel': #change from array to channel
+                # add code to return number of channels and the appropriate
+                # channel number if the current array number is i
+                if i == 0:
+                    return self.numSets, 0
+                else:
+                    advals = np.array([*self.array_dict.values()])
+                    return self.numSets, advals[i-1]+1
+            
+            elif self.current_plot_type == 'Channel' and plot_type == 'Array':  #change from array to channel
+                # add code to return number of arrays and the appropriate
+                # array number if the current channel number is i
+                self.current_plot_type = 'Array'
+                # get values in array_dict
+                advals = np.array([*self.array_dict.values()])
+                # find index that is larger than i
+                vi = (advals >= i).nonzero()
+                return len(self.array_dict), vi[0][0]
+
+
         if ax is None:
             ax = plt.gca()
 
@@ -131,39 +156,65 @@ class Waveform(DPT.DPObject):
         ######################################################################
         #################### start plotting ##################################
         ######################################################################
+        fig = ax.figure  # get the parent figure of the ax
+        
         if plot_type == 'Channel':  # plot in channel level
             # plot the mountainsort data according to the current index 'i'
-            # .........................................
-            # ..................code...................
-            # .........................................
-            y = self.data[i]
-            x = np.arange(y.shape[0])
-            ax.plot(x, y)
+            if self.current_plot_type == 'Array':
+                self.remove_subplots(fig)
+                ax = fig.add_subplot(1,1,1)
 
-    
-        ########labels###############
-        if not plotOpts['TitleOff']:  # if TitleOff icon in the right-click menu is clicked
-            # set the title in this format: channelxxx, fill with zeros if the channel number is not three-digit
-            # .........................................
-            # ..................codes..................
-            # .........................................
-            ax.set_title(self.dirs[i])
+            self.plot_data(i, ax, plotOpts, 1)
+            self.current_plot_type = 'Channel'
             
-        if not plotOpts['LabelsOff']:  # if LabelsOff icon in the right-click menu is clicked
-            # set the xlabel and ylabel
-            # .........................................
-            # ..................code...................
-            # .........................................
+        elif plot_type == 'Array':
+            self.remove_subplots(fig)
+            advals = np.array([*self.array_dict.values()])
+            # set the starting index cstart for array i
+            if i == 0:
+                cstart = 0
+                cend = advals[0]
+            else:
+                cstart = advals[i-1] + 1
+                cend = advals[i]
+            # set the ending index cend for array i
+            
+            currch = cstart
+            plotOpts['LabelsOff'] = True
+            plotOpts['TitleOff'] = True
+            
+            while currch <= cend:
+                # get channel name
+                currchname = self.dirs[currch]
+                # get axis position for channel
+                ax, isCorner = getChannelInArray(currchname, fig)
+                self.plot_data(currch, ax, plotOpts, isCorner)
+                currch += 1
+            self.current_plot_type = 'Array'
+    
+       
+
+        # return ax
+    def plot_data(self, i, ax, plotOpts, isCorner):
+        y = self.data[i]
+        x = np.arange(y.shape[0])
+        ax.plot(x, y)
+
+        if not plotOpts['TitleOff']:
+            ax.set_title(self.dirs[i])
+                
+        if (not plotOpts['LabelsOff']) or isCorner:
             ax.set_xlabel('Time (sample unit)')
             ax.set_ylabel('Voltage (uV)')
 
-        if plotOpts['TicksOff']:
+        if plotOpts['TicksOff'] or (not isCorner):
             ax.set_xticklabels([])
             ax.set_yticklabels([])
 
-        return ax
-    
-    
+    def remove_subplots(self, fig):
+        for x in fig.get_axes():  # remove all axes in current figure
+            x.remove()
+
     
     #%% helper functions        
     # Please make use of the properties of the OOP to call and edit the field-value
